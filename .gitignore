@@ -1,0 +1,24 @@
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.DS_Store
+
+# Kredensial rilis — JANGAN PERNAH commit. Semuanya hanya lewat GitHub Secrets
+# atau file di luar repo. Lihat README bagian "Signing".
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+release.jks
+vmusix-release.jks
+keystore.txt
+signing.properties
+
+# Log & cache
+*.log
+captures/
+.cxx/
+*.hprof

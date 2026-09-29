@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Scan MediaStore (folder Music/VmusiX + Music/LiPhify legacy) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <!-- API <33: nama izin lama, tetap dideklarasikan agar request tidak auto-denied -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <!-- Notifikasi media = izin runtime di API 33+. Tanpa ini, snackbar "izin"
+         akan selalu hilang dan notifikasi putar tidak pernah tampil. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Processor harus tetap hidup saat layar mati; tanpa ini playback terputus
+         begitu device idle. WAJIB untuk app musik. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:name=".VmusiXApp"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:theme="@style/Theme.VmusiX"
+        android:supportsRtl="true"
+        android:enableOnBackInvokedCallback="true"
+        android:allowBackup="false">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            exported="true" WAJIB: MediaSessionService di-bind oleh framework /
+            Android Auto / Wear, yang datang dari proses lain. Media3 menolak
+            build kalau intent-filter MediaSessionService tidak ada.
+        -->
+        <service
+            android:name=".playback.VmusiXSessionService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>
