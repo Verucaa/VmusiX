@@ -23,7 +23,7 @@ import javax.inject.Inject
 const val APP_RELATIVE_PATH = "Music/VmusiX/"
 
 /**
- * Folder lama (sebelum rename aplikasi). Tetap dibaca supaya-library yang sudah
+ * Folder lama (sebelum rename aplikasi). Tetap dibaca supaya library yang sudah
  * ada di perangkat tidak ikut lenyap diam-diam saat upgrade — tanpanya,
  * semua lagu user "hilang" padahal file-nya masih di sana.
  */
@@ -61,7 +61,14 @@ class MediaStoreScanner @Inject constructor(
             ensureFolder()
             // Reindeks dulu: MediaStore belum tentu punya entri untuk file baru.
             reindexFolder(appDir())
-            appDir().listFiles()?.takeIf { it.isDirectory() }?.let { reindexFolder(it) }
+            
+            // PERBAIKAN DI SINI:
+            // listFiles() mengembalikan Array<File>, jadi kita filter folder-nya
+            // lalu jalankan reindexFolder untuk masing-masing folder tersebut.
+            appDir().listFiles()?.filter { it.isDirectory }?.forEach { dir ->
+                reindexFolder(dir)
+            }
+            
             LEGACY_DIR_NAMES.forEach { legacy ->
                 reindexFolder(musicDir().resolve(legacy))
             }
