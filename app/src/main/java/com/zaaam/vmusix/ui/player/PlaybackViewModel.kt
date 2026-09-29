@@ -278,7 +278,7 @@ class PlaybackViewModel @Inject constructor(
             consecutiveSkips++
             _state.value = _state.value.copy(
                 isPlaying = false,
-                error = "Gagal memutar ${current?.title ?: "lagu ini"} (${error.errorCodeName}), lanjut ke lagu berikutnya…",
+                error = "Gagal memutar ${cur?.title ?: "lagu ini"} (${error.errorCodeName}), lanjut ke lagu berikutnya…",
             )
             // Jangan biarin antrian macet total gara-gara satu URL YouTube yang
             // udah basi/gagal — coba lanjut ke lagu berikutnya secara otomatis.
