@@ -16,17 +16,22 @@ plugins {
  *   export VMUSIX_KEY_PASSWORD=...
  *   ./gradlew assembleRelease
  *
- * Kalau keempatnya kosong, `signingConfig` = null -> APK release tetap
- * dibangun tapi UNSIGNED (Android menolak memasangnya). Itu Fail-Loud yang
- * sengaja: lebih baik error jelas daripada "install ditolak" tanpa sebab.
+ * Kalau keempatnya kosong, APK release tetap dibangun tapi UNSIGNED
+ * (Android menolak memasangnya) — fail-loud yang sengaja.
  *
  * Di CI, pakai GitHub Secrets (lihat .github/workflows/build.yml).
+ *
+ * CATATAN PENTING: nama local val di bawah sengaja dikasih prefix `env`
+ * supaya tidak tabrakan dengan nama property `SigningConfig` (keyAlias,
+ * keyPassword, storeFile, storePassword). Kalau namanya sama, di dalam
+ * `signingConfigs { create(...) { ... } }` yang kebaca adalah property
+ * receiver-nya sendiri, bukan variabel luar — nilainya jadi null.
  */
-val ksPath: String? = System.getenv("VMUSIX_KEYSTORE")
-val ksPass: String? = System.getenv("VMUSIX_KEYSTORE_PASSWORD")
-val keyAlias: String? = System.getenv("VMUSIX_KEY_ALIAS")
-val keyPass: String? = System.getenv("VMUSIX_KEY_PASSWORD")
-val hasSigning = listOf(ksPath, ksPass, keyAlias, keyPass).all { !it.isNullOrBlank() }
+val envKsPath: String? = System.getenv("VMUSIX_KEYSTORE")
+val envKsPass: String? = System.getenv("VMUSIX_KEYSTORE_PASSWORD")
+val envKeyAlias: String? = System.getenv("VMUSIX_KEY_ALIAS")
+val envKeyPass: String? = System.getenv("VMUSIX_KEY_PASSWORD")
+val hasSigning = listOf(envKsPath, envKsPass, envKeyAlias, envKeyPass).all { !it.isNullOrBlank() }
 
 android {
     namespace = "com.zaaam.vmusix"
@@ -44,10 +49,10 @@ android {
     if (hasSigning) {
         signingConfigs {
             create("release") {
-                storeFile = file(ksPath!!)
-                storePassword = ksPass
-                keyAlias = keyAlias
-                keyPassword = keyPass
+                storeFile = file(envKsPath!!)
+                storePassword = envKsPass
+                keyAlias = envKeyAlias
+                keyPassword = envKeyPass
                 enableV1Signing = true
                 enableV2Signing = true
             }
@@ -62,10 +67,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = if (hasSigning) {
-                signingConfigs.getByName("release")
-            } else {
-                null
+            if (hasSigning) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
         debug {
